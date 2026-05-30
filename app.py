@@ -224,9 +224,9 @@ def _render_config():
         c4.metric("Check every",  "15 min")
 
         st.caption(
-            "Optimised params: H1 2yr grid search (504 combos) | "
-            "3-candle @ 2% risk → +35.6%/yr, 26.4% max DD  "
-            "Session filter: 07:00–21:00 UTC"
+            "Optimised: 5yr Dukascopy H1 grid search | "
+            "5% risk + 1.5 R:R → +239%/yr, 30.6% max DD (703 trades/5yr) | "
+            "~2-3 trades/week | Session: 07:00-21:00 UTC"
         )
 
 

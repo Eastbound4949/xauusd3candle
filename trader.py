@@ -19,9 +19,9 @@ from typing import Optional
 log = logging.getLogger(__name__)
 
 STARTING_CAPITAL = float(os.getenv("STARTING_CAPITAL", "1000.0"))
-RISK_PCT         = float(os.getenv("RISK_PCT", "2.0"))
-RR_RATIO         = float(os.getenv("RR_RATIO", "1.5"))
-DB_PATH          = os.getenv("DB_PATH", "/data/trades.db")   # Railway volume mount
+RISK_PCT         = float(os.getenv("RISK_PCT", "5.0"))    # optimised: 5yr Dukascopy H1
+RR_RATIO         = float(os.getenv("RR_RATIO", "1.5"))    # 1.5 R:R beats 2.0 on this strategy
+DB_PATH          = os.getenv("DB_PATH", "/data/trades.db")
 
 
 @dataclass
