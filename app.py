@@ -83,13 +83,8 @@ def _check_signals():
 
 @st.cache_resource
 def _start_bot():
-    """Init DB and start background thread once per process."""
+    """Ensure DB exists. Worker process handles the signal loop."""
     trader.init_db()
-    initial_equity = trader.get_equity()
-    trader._log_equity(initial_equity, "startup")
-    t = threading.Thread(target=_bot_loop, daemon=True, name="bot")
-    t.start()
-    log.info("Bot started. Initial equity: $%.2f", initial_equity)
     return True
 
 
