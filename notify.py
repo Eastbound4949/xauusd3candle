@@ -22,6 +22,14 @@ def _send(msg: str):
         log.debug("Telegram failed: %s", exc)
 
 
+def bot_started(equity: float):
+    _send(
+        f"[XAUUSD 3-Candle STARTED]\n"
+        f"Paper bot live on Railway\n"
+        f"Capital: ${equity:,.2f}  Session: 07:00-21:00 UTC  Check: every 15min"
+    )
+
+
 def trade_opened(direction: str, entry: float, sl: float, tp: float, risk: float):
     label = "BUY" if direction == "buy" else "SELL"
     rr    = round(abs(tp - entry) / abs(entry - sl), 2) if abs(entry - sl) > 0 else 0

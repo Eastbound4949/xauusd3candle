@@ -10,7 +10,6 @@ Optimised via 10yr D1 + 2yr H1 backtests (grid search, DD < 30%).
 
 import logging
 import os
-import threading
 import time
 from datetime import datetime, timezone
 
@@ -28,64 +27,6 @@ log = logging.getLogger("app")
 
 REFRESH_INTERVAL = 15 * 60   # 15 minutes between signal checks
 BOT_NAME         = "XAUUSD 3-Candle Paper Bot"
-
-
-# ── Background bot thread ─────────────────────────────────────────────────────
-
-def _bot_loop():
-    """Signal checker — runs forever in background thread."""
-    log.info("Bot thread started")
-    while True:
-        try:
-            _check_signals()
-        except Exception as exc:
-            log.exception("Bot loop error: %s", exc)
-        time.sleep(REFRESH_INTERVAL)
-
-
-def _check_signals():
-    """One tick: update open positions, then check for new signal."""
-    df = strategy.fetch_bars()
-    if df is None or df.empty:
-        log.warning("No bar data — skipping tick")
-        return
-
-    latest_bar = df.iloc[-1]
-    bar_high   = float(latest_bar["high"])
-    bar_low    = float(latest_bar["low"])
-
-    # Step 1: update any open position
-    close_event = trader.check_and_close_positions(bar_high, bar_low)
-    if close_event:
-        notify.trade_closed(
-            direction=close_event["direction"],
-            entry=close_event["entry"],
-            close_px=close_event["close_price"],
-            pnl=close_event["pnl"],
-            equity=close_event["equity"],
-            status=close_event["status"],
-        )
-
-    # Step 2: look for new signal (only if no open position)
-    if not trader.has_open_trade():
-        sig = strategy.generate_signal(df)
-        if sig:
-            trade = trader.open_trade(sig)
-            notify.trade_opened(
-                direction=trade.direction,
-                entry=trade.entry,
-                sl=trade.sl,
-                tp=trade.tp,
-                risk=trade.risk_amount,
-            )
-            log.info("Signal: %s at %.2f", sig["direction"], sig["entry"])
-
-
-@st.cache_resource
-def _start_bot():
-    """Ensure DB exists. Worker process handles the signal loop."""
-    trader.init_db()
-    return True
 
 
 # ── UI helpers ────────────────────────────────────────────────────────────────
@@ -240,8 +181,6 @@ def main():
         page_icon="gold",
         layout="wide",
     )
-
-    _start_bot()
 
     equity = trader.get_equity()
     stats  = trader.get_stats()

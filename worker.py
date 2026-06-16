@@ -12,6 +12,7 @@ import time
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    stream=sys.stdout,
     force=True,
 )
 log = logging.getLogger("worker")
@@ -68,6 +69,7 @@ def main():
     equity = trader.get_equity()
     trader._log_equity(equity, "startup")
     log.info("DB ready. Starting equity: $%.2f", equity)
+    notify.bot_started(equity)
 
     def _shutdown(signum, frame):
         log.info("Worker shutting down...")
