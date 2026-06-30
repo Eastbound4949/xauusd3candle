@@ -30,11 +30,7 @@ def _check_signals():
         log.warning("No bar data — skipping tick")
         return
 
-    latest_bar = df.iloc[-1]
-    bar_high   = float(latest_bar["high"])
-    bar_low    = float(latest_bar["low"])
-
-    close_event = trader.check_and_close_positions(bar_high, bar_low)
+    close_event = trader.check_and_close_positions(df)
     if close_event:
         notify.trade_closed(
             direction=close_event["direction"],

@@ -16,6 +16,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
+import pandas as pd
+
 log = logging.getLogger(__name__)
 
 STARTING_CAPITAL = float(os.getenv("STARTING_CAPITAL", "1000.0"))
@@ -152,9 +154,12 @@ def open_trade(signal: dict) -> PaperTrade:
     )
 
 
-def check_and_close_positions(bar_high: float, bar_low: float) -> Optional[dict]:
+def check_and_close_positions(df) -> Optional[dict]:
     """
-    Check open positions against bar H/L. Close if SL or TP hit.
+    Check open positions against every H1 bar since each position's open_time
+    (not just the latest bar), so a wick touch or a fill missed during
+    downtime/redeploy is still caught. `df` is the H1 bars frame from
+    strategy.fetch_bars() with a UTC DatetimeIndex and high/low columns.
     Returns close event dict or None.
     """
     with _conn() as con:
@@ -168,8 +173,17 @@ def check_and_close_positions(bar_high: float, bar_low: float) -> Optional[dict]
         tp   = row["tp"]
         risk = row["risk_amount"]
 
-        sl_hit = bar_low  <= sl if d == "buy" else bar_high >= sl
-        tp_hit = bar_high >= tp if d == "buy" else bar_low  <= tp
+        open_ts = pd.Timestamp(row["open_time"])
+        open_ts = open_ts.tz_localize("UTC") if open_ts.tzinfo is None else open_ts.tz_convert("UTC")
+        bars = df[df.index >= open_ts]
+
+        sl_hit = tp_hit = False
+        for _, bar in bars.iterrows():
+            bar_high, bar_low = float(bar["high"]), float(bar["low"])
+            sl_hit = bar_low  <= sl if d == "buy" else bar_high >= sl
+            tp_hit = bar_high >= tp if d == "buy" else bar_low  <= tp
+            if sl_hit or tp_hit:
+                break
 
         if sl_hit or tp_hit:
             win       = tp_hit and not sl_hit
