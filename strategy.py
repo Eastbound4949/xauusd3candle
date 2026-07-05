@@ -23,12 +23,15 @@ except ImportError:
 
 log = logging.getLogger(__name__)
 
-# ── Strategy params (optimised: H1 2yr grid search) ──────────────────────────
-CANDLE_COUNT    = 3
-RR_RATIO        = 1.5
+# ── Strategy params (re-opt 2026-07-04: 5yr Dukascopy H1, close-confirm model — ──
+#    see research-archive/XAUUSD 3-Candle (reopt batch2)/optimize_close_confirm_v2.py)
+# candles=2 RR=3.5 sess=NY-only(12-21) atr_mult=4.0 both-dir @ 5% risk:
+# Sharpe=1.83 CAGR=267.2% MaxDD=-39.2% WR=32.3% PF=1.67 74.8 tr/yr, 1 neg yr/5
+CANDLE_COUNT    = 2
+RR_RATIO        = 3.5
 ATR_PERIOD      = 14
-MAX_ATR_SL_MULT = 3.0
-ACTIVE_HOURS    = set(range(7, 21))   # London + NY session (UTC)
+MAX_ATR_SL_MULT = 4.0
+ACTIVE_HOURS    = set(range(12, 21))  # NY session only (UTC)
 
 TICKER   = "GC=F"    # Gold futures — closest free proxy for XAUUSD
 INTERVAL = "1h"
